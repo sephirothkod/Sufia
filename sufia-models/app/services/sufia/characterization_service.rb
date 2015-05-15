@@ -33,7 +33,10 @@ module Sufia
       end
 
       def store_metadata(metadata)
-        generic_file.characterization.ng_xml = metadata if metadata.present?
+        return if metadata.blank?
+        characterization_terms = FitsMetadataParser.run(metadata)
+        # TODO: take terms from OM document and put in the right place
+        #generic_file.characterization.ng_xml = metadata
         append_metadata
       end
 
