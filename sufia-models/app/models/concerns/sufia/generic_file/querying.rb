@@ -9,17 +9,22 @@ module Sufia
         # @param [DateTime] end_datetime ending date time for range query
         def find_by_date_created(start_datetime, end_datetime = nil)
           return [] if start_datetime.blank?  # no date just return nothing
-          where(build_date_query(start_datetime, end_datetime))
+          # Notice that we use date_uploaded_ssi because that is a date that we
+          # control. The system_create_dtsi is a date controlled by Fedora and
+          # for files migrated from one repo to another it reflects the date
+          # the file was added to the Fedora repo, not the date the user originally
+          # uploaded the file.
+          where(build_date_query(start_datetime, end_datetime, "date_uploaded_ssi"))
         end
 
-        def build_date_query(start_datetime, end_datetime)
+        def build_date_query(start_datetime, end_datetime, date_field = "system_create_dtsi")
           start_date_str =  start_datetime.utc.strftime(date_format)
           end_date_str = if end_datetime.blank?
                            "*"
                          else
                            end_datetime.utc.strftime(date_format)
                          end
-          "system_create_dtsi:[#{start_date_str} TO #{end_date_str}]"
+          "#{date_field}:[#{start_date_str} TO #{end_date_str}]"
         end
 
         def where_private
